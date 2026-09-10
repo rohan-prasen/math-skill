@@ -34,6 +34,10 @@ The output of this skill is never chat text alone. Every time this skill is used
 
 Deliver the file to the user with a link once saved; do not just paste the solution into chat and stop there.
 
+## Dependency: humanizer skill
+
+Step 5 below invokes the external `humanizer:humanizer` skill (https://github.com/blader/humanizer) to strip AI-writing artifacts from the final prose. It is not bundled with this skill and may not be installed on every client — see step 5 for how to detect that and get it installed.
+
 ## Mandatory workflow
 
 Follow this loop every time this skill is invoked — do not skip the self-scoring step or the humanizing pass:
@@ -43,6 +47,11 @@ Follow this loop every time this skill is invoked — do not skip the self-scori
 3. **Draft the full solution** following the Six Writing Tips (below) line by line: narrate reasoning in full sentences, show every non-trivial step, use only correctly-meaning notation, label any diagrams/graphs, and finish with the result restated in a full sentence.
 4. **Self-score the draft** against the 10-Point Rubric (below). Score honestly — do not round up. If the total is below 9/10: identify the specific lowest-scoring item(s), revise the draft to fix exactly those weaknesses, and re-score from scratch. Repeat this revise-and-rescore loop until the score is ≥ 9/10.
 5. **Invoke the `humanizer:humanizer` skill** on the finished, rubric-passing draft — specifically on its explanatory prose (the full-sentence reasoning, setup, and conclusion text) — to strip AI-writing artifacts: stock phrases, inflated claims, repetitive sentence structure, filler transitions, and unnecessary hedging. Do this as an actual invocation (via the Skill tool), not a manual rewrite of humanizing rules. The humanizer pass must never alter any equation, numeric value, variable definition, notation, or the mathematical content/logic of the solution — only the surrounding prose style.
+   - **If `humanizer:humanizer` is not available** (absent from the available-skills listing, or the Skill tool call errors as unknown): stop and tell the user it's required for this step, with a link to https://github.com/blader/humanizer, and show the install command for the current environment — then wait for explicit approval before running anything:
+     - Claude Code: `/plugin marketplace add blader/humanizer` then `/plugin install humanizer@humanizer`
+     - Any other agent/CLI: `npx skills add blader/humanizer --global`
+   - **If approved**, run the install command, then invoke `humanizer:humanizer` as normal.
+   - **If declined**, don't block the rest of the workflow: manually strip stock phrases, inflated claims, filler transitions, repetitive structure, and unnecessary hedging from the prose by hand, following the same criteria the humanizer skill itself uses (Wikipedia's "Signs of AI writing"), then continue to step 6.
 6. **Re-check items 1–5 of the rubric** on the humanized text (explanation present, notation still correct, logic still visible) — a style pass should not have removed substance, but confirm it didn't.
 7. **Write the final version to the markdown file** described above and save it to the workspace folder.
 8. **Deliver the file link**, followed by a one-line self-assessment, e.g. `Self-check: 9/10 — diagram fully labelled, all steps justified; minor: could restate final units more explicitly.` Omit the visible score line only if the user explicitly asks for a clean file with no meta-commentary — but still run the internal scoring loop silently.
