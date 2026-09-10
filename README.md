@@ -1,4 +1,4 @@
-# Math Skill (Claude Code)
+# Math Skill 
 
 `SKILL.md` in this repo instructs Claude Code (or any compatible agent) how to write and self-grade math/stats solutions. Workflow, rubric, checklist — original.
 
